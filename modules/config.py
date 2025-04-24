@@ -15,15 +15,17 @@ SAMPLE_RATE = 250  # Hz
 EEG_CHANNELS = ["CH1", "CH2", "CH3", "CH4", "CH5", "CH6", "CH7", "CH8"]
 
 # Motor Imagery Experiment Parameters
-NUM_TRIALS = 40  # Configurable number of trials
+NUM_TRIALS = 35  # Configurable number of trials
 INSTRUCTION_DURATION = 2.0  # seconds to show left/right instruction
 IMAGERY_DURATION = 5.0  # seconds for motor imagery
 INTER_TRIAL_INTERVAL = 3.0  # seconds between trials
+NO_MOVEMENT_PROBABILITY = 0.1  # Probability of a no-movement trial occurring
 
 # Marker values
 MARKER_RIGHT = "1"  # right hand imagery
 MARKER_LEFT = "2"   # left hand imagery
 MARKER_STOP = "3"   # end of imagery period
+MARKER_NO_MOVEMENT = "0"  # no movement/rest trials
 
 # File/directories
 RAW_DATA_DIR = "data/raw"

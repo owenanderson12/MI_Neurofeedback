@@ -70,8 +70,13 @@ class NeurofeedbackProcessor:
         """Set the active hand for the current trial."""
         self.active_hand = hand
         # Use contralateral hemisphere: left hand -> right hemisphere (CH6), right hand -> left hemisphere (CH3)
-        self.channel_index = 5 if hand == "left" else 2  # CH6 (index 5) or CH3 (index 2)
-        logging.info(f"Active hand set to {hand}, using channel {EEG_CHANNELS[self.channel_index]}")
+        if hand == "no_movement":
+            # For no-movement trials, use both channels or a default channel
+            self.channel_index = 2  # Default to CH3 (can be modified as needed)
+            logging.info(f"No movement trial, using channel {EEG_CHANNELS[self.channel_index]} for baseline")
+        else:
+            self.channel_index = 5 if hand == "left" else 2  # CH6 (index 5) or CH3 (index 2)
+            logging.info(f"Active hand set to {hand}, using channel {EEG_CHANNELS[self.channel_index]}")
         
     def start_initial_baseline_collection(self):
         """Start collecting data for initial baseline calculation."""

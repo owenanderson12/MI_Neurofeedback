@@ -132,12 +132,22 @@ def run_neurofeedback_experiment(neurofeedback_processor):
         autoLog=False
     )
 
-    # Generate randomized trial list
-    trials = ["right", "left"] * (NUM_TRIALS // 2)
-    random.shuffle(trials)
+    # Generate randomized trial list with both hands
+    base_trials = ["right", "left"] * (NUM_TRIALS // 2)
+    
+    # Add no-movement trials based on probability
+    final_trials = []
+    for trial in base_trials:
+        if random.random() < NO_MOVEMENT_PROBABILITY:
+            final_trials.append("no_movement")
+        else:
+            final_trials.append(trial)
+            
+    # Shuffle all trials
+    random.shuffle(final_trials)
     
     # Show initial instructions
-    instruction_text.text = "Motor Imagery Neurofeedback\n\nImagine moving your hand when instructed\n\nThe feedback bars will show your brain activity\n\nPress SPACE to begin"
+    instruction_text.text = "Motor Imagery Neurofeedback\n\nImagine moving your hand when instructed\n\nDo not move when 'NO MOVEMENT' is shown\n\nThe feedback bars will show your brain activity\n\nPress SPACE to begin"
     instruction_text.draw()
     win.flip()
     event.waitKeys(keyList=["space"])
@@ -172,13 +182,17 @@ def run_neurofeedback_experiment(neurofeedback_processor):
     core.wait(2.0)
 
     # Main experiment loop
-    for trial_num, hand in enumerate(trials, 1):
-        # Set the active hand for this trial
-        neurofeedback_processor.set_active_hand(hand)
-        
-        # Update the channel indicator
-        channel_used = "CH3" if hand == "right" else "CH6"
-        channel_text.text = f"Using {channel_used} (Contralateral Hemisphere)"
+    for trial_num, hand in enumerate(final_trials, 1):
+        # Set the active hand for this trial (or handle no-movement)
+        if hand != "no_movement":
+            neurofeedback_processor.set_active_hand(hand)
+            
+            # Update the channel indicator
+            channel_used = "CH3" if hand == "right" else "CH6"
+            channel_text.text = f"Using {channel_used} (Contralateral Hemisphere)"
+        else:
+            # For no-movement trials, display both channels
+            channel_text.text = "Maintain resting state (no movement)"
         
         # Display get ready message
         ready_text.draw()
@@ -186,8 +200,12 @@ def run_neurofeedback_experiment(neurofeedback_processor):
         win.flip()
         core.wait(1.0)
         
-        # Show instruction (right or left hand)
-        instruction_text.text = f"{hand.upper()} HAND"
+        # Show instruction (right hand, left hand, or no movement)
+        if hand == "no_movement":
+            instruction_text.text = "NO MOVEMENT"
+        else:
+            instruction_text.text = f"{hand.upper()} HAND"
+        
         instruction_text.draw()
         channel_text.draw()
         win.flip()
@@ -219,7 +237,10 @@ def run_neurofeedback_experiment(neurofeedback_processor):
         instruction_text.draw()
         channel_text.draw()
         # Schedule marker to be sent on next flip
-        marker_val = MARKER_RIGHT if hand == "right" else MARKER_LEFT
+        if hand == "no_movement":
+            marker_val = MARKER_NO_MOVEMENT
+        else:
+            marker_val = MARKER_RIGHT if hand == "right" else MARKER_LEFT
         win.callOnFlip(lambda m=marker_val: marker_outlet.push_sample([m]))
         win.flip()
         
@@ -313,7 +334,11 @@ def run_neurofeedback_experiment(neurofeedback_processor):
                 logging.info(f"Frame timing: Mean={mean_frame_time*1000:.1f}ms, Std={std_frame_time*1000:.1f}ms")
                 win.frameIntervals = []  # Reset for next trial
         
-        logging.info(f"Completed trial {trial_num}/{len(trials)}: {hand} hand")
+        # Log completion with appropriate description
+        if hand == "no_movement":
+            logging.info(f"Completed trial {trial_num}/{len(final_trials)}: no movement")
+        else:
+            logging.info(f"Completed trial {trial_num}/{len(final_trials)}: {hand} hand")
         
         # Check for quit
         if event.getKeys(keyList=["escape"]):
