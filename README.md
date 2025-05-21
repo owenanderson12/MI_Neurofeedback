@@ -93,7 +93,8 @@ Modify these values to suit your experimental protocol. ([github.com](https://gi
 
 ## License & Author
 
-**Author**: Owen Anderson<br>
+**Authors**: Owen Anderson (owenanderson2022@gmail.com), 
+
 ---
 
 Enjoy exploring and extending this MI neurofeedback system! Feel free to open issues or contribute. 🎉
